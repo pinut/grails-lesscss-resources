@@ -18,25 +18,28 @@ class NodeJSLessCompiler {
 	}
 
 	static getLessPath() {
-		def p = "/usr/bin/which lessc".execute()
-		p.waitFor()
-		p.text
+		getPathTo "lessc"
 	}
 
 	static getNodePath() {
-		def p = "/usr/bin/which node".execute()
+		getPathTo "node"
+	}
+
+	static getPathTo(program) {
+		def p = "/usr/bin/which $program".execute()
 		p.waitFor()
-		p.text
+		def path = p.text.trim()
+		new File(path).exists() ? path : null
 	}
 
 	def compile(input, target) {
-		println "compiling less file '$input'..."
+		print "compiling less file '$input'... "
 		def args = createArgs(input, target)
-		def output = execute(args)
-		if (output.size()) {
+		def (process, output) = execute(args)
+		if (process.exitValue()) {
 			throw new NodeJSLessException(output.toString())
 		}
-		println "...done"
+		println "done"
 	}
 
 	private createArgs(input, target) {
@@ -48,10 +51,10 @@ class NodeJSLessCompiler {
 	}
 
 	private execute(args) {
-		def p = args.join(' ').execute()
+		def p = args.execute()
 		def sb = new StringBuilder()
 		p.consumeProcessOutput(sb, sb)
 		p.waitFor()
-		sb
+		[p, sb]
 	}
 }
