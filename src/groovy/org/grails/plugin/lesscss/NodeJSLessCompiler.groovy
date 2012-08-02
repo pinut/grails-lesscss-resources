@@ -33,13 +33,11 @@ class NodeJSLessCompiler {
 	}
 
 	def compile(input, target) {
-		print "compiling less file '$input'... "
 		def args = createArgs(input, target)
 		def (process, output) = execute(args)
 		if (process.exitValue()) {
 			throw new NodeJSLessException(output.toString())
 		}
-		println "done"
 	}
 
 	private createArgs(input, target) {
